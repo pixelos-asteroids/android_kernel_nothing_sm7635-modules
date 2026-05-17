@@ -184,11 +184,11 @@ static int btfm_slim_dai_prepare(struct snd_pcm_substream *substream,
 	btfmslim = snd_soc_component_get_drvdata(dai->component);
 	btfmslim->direction = substream->stream;
 	bt_soc_enable_status = 0;
-	BTFMSLIM_INFO("dai->name: %s, dai->id: %d, dai->rate: %d direction: %d", dai->name,
-		dai->id, dai->rate, btfmslim->direction);
+	BTFMSLIM_INFO("dai->name: %s, dai->id: %d, rate: %d direction: %d", dai->name,
+		dai->id, substream->runtime->rate, btfmslim->direction);
 
 	/* save sample rate */
-	btfmslim->sample_rate = dai->rate;
+	btfmslim->sample_rate = substream->runtime->rate;
 
 	switch (dai->id) {
 	case BTFM_FM_SLIM_TX:
@@ -227,7 +227,12 @@ static int btfm_slim_dai_prepare(struct snd_pcm_substream *substream,
 		return ret;
 	}
 
-	ret = btfm_slim_enable_ch(btfmslim, ch, rxport, dai->rate, nchan);
+	if (ch->dai.sruntime != NULL) {
+		BTFMSLIM_INFO("channel already opened, closing before re-opening");
+		btfm_slim_disable_ch(btfmslim, ch, rxport, nchan);
+	}
+
+	ret = btfm_slim_enable_ch(btfmslim, ch, rxport, substream->runtime->rate, nchan);
 
 	/* save the enable channel status */
 	if (ret == 0)

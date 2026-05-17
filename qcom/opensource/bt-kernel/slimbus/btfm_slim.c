@@ -27,7 +27,7 @@
 #include "btfm_slim_hw_interface.h"
 #endif
 
-#define DELAY_FOR_PORT_OPEN_MS (200)
+#define DELAY_FOR_PORT_OPEN_MS (60)
 #define SLIM_MANF_ID_QCOM	0x217
 #define SLIM_PROD_CODE		0x221
 #define BT_CMD_SLIM_TEST	0xbfac
@@ -240,6 +240,8 @@ int btfm_slim_disable_ch(struct btfmslim *btfmslim, struct btfmslim_ch *ch,
 	ch->dai.sruntime = NULL;
 
 	BTFMSLIM_INFO("btfm_num_ports_open: %d", btfm_num_ports_open);
+	if (btfm_num_ports_open == 0)
+		btfmslim->sample_rate = 0;
 
 	chipset_ver = btpower_get_chipset_version();
 
