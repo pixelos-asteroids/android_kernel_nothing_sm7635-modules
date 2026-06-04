@@ -179,11 +179,12 @@ int btfm_slim_disable_ch(struct btfmslim *btfmslim, struct btfmslim_ch *ch,
 	int ret = -1;
 	int i = 0;
 	int chipset_ver = 0;
+	struct btfmslim_ch *chan = ch;
 	if (!btfmslim || !ch)
 		return -EINVAL;
 
-	BTFMSLIM_INFO("port:%d ", ch->port);
-	if (ch->dai.sruntime == NULL) {
+	BTFMSLIM_INFO("port:%d ", chan->port);
+	if (chan->dai.sruntime == NULL) {
 		BTFMSLIM_ERR("Channel not enabled yet. returning");
 		return -EINVAL;
 	}
@@ -192,18 +193,18 @@ int btfm_slim_disable_ch(struct btfmslim *btfmslim, struct btfmslim_ch *ch,
 		btfmslim->sample_rate == 88200)) {
 		BTFMSLIM_INFO("disconnecting the ports, removing the channel");
 		/* disconnect the ports of the stream */
-		ret = slim_stream_unprepare_disconnect_port(ch->dai.sruntime,
+		ret = slim_stream_unprepare_disconnect_port(chan->dai.sruntime,
 				true, false);
 		if (ret != 0)
 			BTFMSLIM_ERR("slim_stream_unprepare failed %d", ret);
 	}
 
-	ret = slim_stream_disable(ch->dai.sruntime);
+	ret = slim_stream_disable(chan->dai.sruntime);
 	if (ret != 0) {
 		BTFMSLIM_ERR("slim_stream_disable failed returned val = %d", ret);
 		if ((btfmslim->sample_rate != 44100) && (btfmslim->sample_rate != 88200)) {
 			/* disconnect the ports of the stream */
-			ret = slim_stream_unprepare_disconnect_port(ch->dai.sruntime,
+			ret = slim_stream_unprepare_disconnect_port(chan->dai.sruntime,
 					true, false);
 			if (ret != 0)
 				BTFMSLIM_ERR("slim_stream_unprepare failed %d", ret);
@@ -211,7 +212,7 @@ int btfm_slim_disable_ch(struct btfmslim *btfmslim, struct btfmslim_ch *ch,
 	}
 
 	/* free the ports allocated to the stream */
-	ret = slim_stream_unprepare_disconnect_port(ch->dai.sruntime, false, true);
+	ret = slim_stream_unprepare_disconnect_port(chan->dai.sruntime, false, true);
 	if (ret != 0)
 		BTFMSLIM_ERR("slim_stream_unprepare failed returned val = %d", ret);
 
@@ -226,18 +227,18 @@ int btfm_slim_disable_ch(struct btfmslim *btfmslim, struct btfmslim_ch *ch,
 			}
 		}
 	}
-	ch->dai.sconfig.port_mask = 0;
-	if (ch->dai.sconfig.chs != NULL) {
-		kfree(ch->dai.sconfig.chs);
-		BTFMSLIM_INFO("setting ch->dai.sconfig.chs to NULL");
-		ch->dai.sconfig.chs = NULL;
+	chan->dai.sconfig.port_mask = 0;
+	if (chan->dai.sconfig.chs != NULL) {
+		kfree(chan->dai.sconfig.chs);
+		BTFMSLIM_INFO("setting chan->dai.sconfig.chs to NULL");
+		chan->dai.sconfig.chs = NULL;
 	} else
-		BTFMSLIM_ERR("ch->dai.sconfig.chs is already NULL");
+		BTFMSLIM_ERR("chan->dai.sconfig.chs is already NULL");
 
 	if (btfm_num_ports_open > 0)
 		btfm_num_ports_open--;
 
-	ch->dai.sruntime = NULL;
+	chan->dai.sruntime = NULL;
 
 	BTFMSLIM_INFO("btfm_num_ports_open: %d", btfm_num_ports_open);
 	if (btfm_num_ports_open == 0)
