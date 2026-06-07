@@ -3273,7 +3273,7 @@ wlan_hdd_set_station_stats_request_pending(struct wlan_hdd_link_info *link_info,
 
 	peer = wlan_objmgr_vdev_try_get_bsspeer(vdev, WLAN_OSIF_STATS_ID);
 	if (!peer) {
-		osif_err("peer is null");
+		osif_debug("peer is null");
 		hdd_objmgr_put_vdev_by_user(vdev, WLAN_OSIF_STATS_ID);
 		return QDF_STATUS_E_INVAL;
 	}
