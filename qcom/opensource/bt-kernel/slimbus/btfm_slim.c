@@ -27,7 +27,16 @@
 #include "btfm_slim_hw_interface.h"
 #endif
 
-#define DELAY_FOR_PORT_OPEN_MS (60)
+/*
+ * Delay after all SLIMbus BT-audio ports are closed, before the next port open,
+ * to let Moselle-class WCN re-sync the controller (SB reset). Reduced from the
+ * vendor default of 60ms to shorten the SCO bring-up gap during the A2DP->SCO
+ * handoff (call started while BT music is playing): a shorter window means SCO
+ * audio re-establishes faster, narrowing the transient in which the framework
+ * sees SCO as down. Pairs with the Telecom-side grace window that avoids demoting
+ * the call to the earpiece during this window.
+ */
+#define DELAY_FOR_PORT_OPEN_MS (20)
 #define SLIM_MANF_ID_QCOM	0x217
 #define SLIM_PROD_CODE		0x221
 #define BT_CMD_SLIM_TEST	0xbfac
